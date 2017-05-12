@@ -19,7 +19,6 @@ package org.geowebcache.nested;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.geowebcache.mime.MimeException;
@@ -213,6 +212,17 @@ public class NestedBlobStoreTest {
     }
 
     @Test
+    public void testDeleteByParametersId() throws StorageException {
+       NestedBlobStore store = configureStore();
+       String parametersId="parametersId";
+       String layer = "layer";
+       store.deleteByParametersId(layer , parametersId);
+       Mockito.verify(frontStore).deleteByParametersId(layer, parametersId);
+       Mockito.verify(backingStore).deleteByParametersId(layer, parametersId);
+       Mockito.verifyNoMoreInteractions(frontStore, backingStore);
+    }
+    
+    @Test
     public void testRename() throws StorageException {
         NestedBlobStore store = configureStore();
         String oldLayerName = "oldLayerName";
@@ -232,6 +242,15 @@ public class NestedBlobStoreTest {
         assertTrue(store.layerExists("frontLayerName"));
         assertTrue(store.layerExists("backLayerName"));
         assertFalse(store.layerExists("nonExistantLayerName"));
+    }
+    
+    @Test 
+    public void testGetParametersMapping() {
+        NestedBlobStore store = configureStore();
+        String layer="layer";
+        store.getParametersMapping(layer);
+        Mockito.verify(backingStore).getParametersMapping(layer);
+        Mockito.verifyZeroInteractions(frontStore, backingStore);
     }
 
     @Test
@@ -269,6 +288,11 @@ public class NestedBlobStoreTest {
             @Override
             public void gridSubsetDeleted(String layerName, String gridSetId) {
 
+            }
+
+            @Override
+            public void parametersDeleted(String layerName, String parametersId) {
+                
             }
         };
         store.addListener(listener);
@@ -312,6 +336,11 @@ public class NestedBlobStoreTest {
             @Override
             public void gridSubsetDeleted(String layerName, String gridSetId) {
 
+            }
+
+            @Override
+            public void parametersDeleted(String layerName, String parametersId) {
+                
             }
         };
         store.removeListener(listener);

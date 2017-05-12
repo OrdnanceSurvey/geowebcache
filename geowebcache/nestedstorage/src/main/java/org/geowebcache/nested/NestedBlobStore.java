@@ -16,6 +16,9 @@
  */
 package org.geowebcache.nested;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.geowebcache.storage.BlobStore;
 import org.geowebcache.storage.BlobStoreListener;
 import org.geowebcache.storage.StorageException;
@@ -48,6 +51,18 @@ public class NestedBlobStore implements BlobStore {
             ret = backingStore.deleteByGridsetId(layerName, gridSetId);
         } finally {
             frontStore.deleteByGridsetId(layerName, gridSetId);
+        }
+        return ret;
+    }
+    
+    @Override
+    public boolean deleteByParametersId(String layerName, String parametersId)
+            throws StorageException {
+        boolean ret = false;
+        try {
+            ret = backingStore.deleteByParametersId(layerName, parametersId);
+        } finally {
+            frontStore.deleteByParametersId(layerName, parametersId);
         }
         return ret;
     }
@@ -153,5 +168,10 @@ public class NestedBlobStore implements BlobStore {
     @Override
     public boolean layerExists(String layerName) {
         return frontStore.layerExists(layerName) || backingStore.layerExists(layerName);
+    }
+
+    @Override
+    public Map<String, Optional<Map<String, String>>> getParametersMapping(String layerName) {
+        return backingStore.getParametersMapping(layerName);
     }
 }
